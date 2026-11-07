@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "ms-python.python",
+        "redhat.vscode-yaml",
+        "github.vscode-github-actions",
+        "GitHub.vscode-pull-request-github",
+        "ms-vscode-remote.remote-ssh"
+    ]
+}
