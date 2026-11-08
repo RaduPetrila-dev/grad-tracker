@@ -50,10 +50,27 @@ def upsert_listing(db: Session, data: dict) -> bool:
     if existing is None:
         db.add(Listing(**data))
         return True
+    if (existing.salary_min, existing.salary_max) != (data['salary_min'], data["salary_max"]):
+        existing.salary_type = None
     for key, value in data.items():
         setattr(existing, key, value)
     existing.last_seen_at = utcnow()
     return False
+
+def listings_missing_salary_type(db: Session, limit: int) -> list[Listing]:
+    query = (
+        select(Listing)
+        .where(
+            Listing.source == "reed",
+            Listing.salary_type.is_(None),
+            or_(Listing.salary_min.is_not(None), Listing.salary_max.is_not(None)),
+        )
+        .order_by(Listing.id)
+        .limit(limit)
+
+    )
+    return list(db.scalars(query).all())
+
 
 def listing_counts(db: Session) -> dict[str, int]:
     rows = db.execute(select(Listing.sector, func.count(Listing.id)).group_by(Listing.sector))

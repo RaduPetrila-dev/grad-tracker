@@ -20,8 +20,9 @@
 <article>
   <header><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></header>
   <p>{{ item.company or "Company not listed" }} · {{ item.location or "Location not listed" }}</p>
-  {% if item.salary_min %}
-  <p>£{{ "{:,.0f}".format(item.salary_min) }}{% if item.salary_max and item.salary_max != item.salary_min %} to £{{ "{:,.0f}".format(item.salary_max) }}{% endif %}</p>
+  {% set pay = format_pay(item.salary_min, item.salary_max, item.salary_type) %}
+  {% if pay %}
+  <p>{{ pay }}</p>
   {% endif %}
   <small>Added {{ item.first_seen_at.strftime("%d %b %Y") }}</small>
 </article>

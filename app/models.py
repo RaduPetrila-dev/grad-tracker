@@ -26,6 +26,7 @@ class Listing(Base):
     url: Mapped[str] = mapped_column(Text)
     salary_min: Mapped[float | None] = mapped_column(Float)
     salary_max: Mapped[float | None] = mapped_column(Float)
+    salary_type: Mapped[str | None] = mapped_column(String(20))
     posted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     first_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utcnow)

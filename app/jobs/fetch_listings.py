@@ -2,6 +2,9 @@ import logging
 import sys
 
 import httpx
+import time
+
+from sqlalchemy.orm import Session
 
 from app import crud
 from app.config import settings
@@ -27,6 +30,9 @@ TITLE_WORDS = {
 
 SENIOR_WORDS = ("senior", "principal", "consultant", "lead", "head of", "manager", "director")
 
+MAX_DETAIL_CALLS = 150
+DETAIL_PAUSE_SECONDS = 0.5
+
 log = logging.getLogger('fetch_listings')
 
 def is_relevant(title: str, sector: str) -> bool:
@@ -35,7 +41,22 @@ def is_relevant(title: str, sector: str) -> bool:
         return False
     return any(word in title for word in TITLE_WORDS[sector])
 
-def run(client: httpx.Client, api_key: str) -> FetchRun:
+def fill_salary_types(db: Session, client: httpx.Client, api_key: str, pause:float) -> int:
+    filled = 0
+    for i, listing in enumerate(crud.listings_missing_salary_type(db, MAX_DETAIL_CALLS)):
+        if i:
+            time.sleep(pause)
+        try:
+            record = reed.details(client, api_key, listing.external_id)
+        except httpx.HTTPError as exc:
+            log.warning("no details for job %s: %r", listing.external_id, exc)
+            continue
+        listing.salary_type = reed.salary_type(record) or ""
+        if listing.salary_type:
+            filled += 1
+    return filled
+
+def run(client: httpx.Client, api_key: str, pause: float = DETAIL_PAUSE_SECONDS) -> FetchRun:
     db = SessionLocal()
     fetch_run = FetchRun()
     db.add(fetch_run)
@@ -52,6 +73,7 @@ def run(client: httpx.Client, api_key: str) -> FetchRun:
                     continue
                 if crud.upsert_listing(db, reed.to_listing(result, sector)):
                     new += 1
+        log.info("salary periods filled for %d listings", fill_salary_types(db, client, api_key, pause))
         fetch_run.status = "sucess"
     except Exception as exc:
         db.rollback()

@@ -19,6 +19,7 @@ class ListingOut(BaseModel):
     url: str
     salary_min: float | None
     salary_max: float | None
+    salary_type: str | None
     posted_at: datetime | None
     first_seen_at: datetime
 
