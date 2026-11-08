@@ -3,11 +3,12 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app import api
+from app import api, pages
 from app.db import get_db
 
 app = FastAPI(title="UK Grad Tracker", version="1.0.0")
 app.include_router(api.router)
+app.include_router(pages.router)
 
 
 

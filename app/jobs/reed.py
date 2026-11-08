@@ -24,7 +24,7 @@ def to_listing(result: dict, sector: str) -> dict:
         "external_id": str(result["jobId"]),
         "sector": sector,
         "title": (result.get("jobTitle") or "")[:300],
-        "company": result.get("employmerName"),
+        "company": result.get("employerName"),
         "location": result.get("locationName"),
         "url": result["jobUrl"],
         "salary_min": result.get("minimumSalary"),

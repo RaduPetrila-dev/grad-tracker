@@ -17,7 +17,23 @@ SEARCHES = [
     ("psychology", "psychology", True),
 ]
 
+TITLE_WORDS = {
+    "pharma": (
+        "pharma", "scientist", "chemist", "laborator", "biolog", "biotech", "bioprocess",
+        "clinical", "regulatory", "quality", "formulation", "analytical", "graduate programme", "graduate scheme",
+    ),
+    "psychology": ("psycholog", "mental health", "wellbeing", "behaviour"),
+}
+
+SENIOR_WORDS = ("senior", "principal", "consultant", "lead", "head of", "manager", "director")
+
 log = logging.getLogger('fetch_listings')
+
+def is_relevant(title: str, sector: str) -> bool:
+    title = title.lower()
+    if any(word in title for word in SENIOR_WORDS):
+        return False
+    return any(word in title for word in TITLE_WORDS[sector])
 
 def run(client: httpx.Client, api_key: str) -> FetchRun:
     db = SessionLocal()
@@ -32,6 +48,8 @@ def run(client: httpx.Client, api_key: str) -> FetchRun:
             log.info("%s: %d results for %r", sector, len(results), keywords)
             for result in results:
                 seen += 1
+                if not is_relevant(result.get("jobTitle") or "", sector):
+                    continue
                 if crud.upsert_listing(db, reed.to_listing(result, sector)):
                     new += 1
         fetch_run.status = "sucess"

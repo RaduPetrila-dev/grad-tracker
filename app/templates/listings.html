@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Graduate roles in pharma and clinical psychology</h1>
+
+<form method="get" action="/" role="search">
+  <select name="sector" aria-label="Sector">
+    <option value="">All sectors</option>
+    {% for key, label in sectors.items() %}
+    <option value="{{ key }}" {% if key == sector %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title or company">
+  <button type="submit">Filter</button>
+</form>
+
+<p>{{ total }} role{{ "s" if total != 1 }} found</p>
+
+{% for item in items %}
+<article>
+  <header><a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.title }}</a></header>
+  <p>{{ item.company or "Company not listed" }} · {{ item.location or "Location not listed" }}</p>
+  {% if item.salary_min %}
+  <p>£{{ "{:,.0f}".format(item.salary_min) }}{% if item.salary_max and item.salary_max != item.salary_min %} to £{{ "{:,.0f}".format(item.salary_max) }}{% endif %}</p>
+  {% endif %}
+  <small>Added {{ item.first_seen_at.strftime("%d %b %Y") }}</small>
+</article>
+{% else %}
+<p>No roles match this filter yet.</p>
+{% endfor %}
+
+{% if pages > 1 %}
+<nav>
+  <ul>
+    {% if page > 1 %}
+    <li><a href="?sector={{ sector or '' }}&q={{ q | urlencode }}&page={{ page - 1 }}">Previous</a></li>
+    {% endif %}
+    <li>Page {{ page }} of {{ pages }}</li>
+    {% if page < pages %}
+    <li><a href="?sector={{ sector or '' }}&q={{ q | urlencode }}&page={{ page + 1 }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}
