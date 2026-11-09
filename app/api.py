@@ -26,11 +26,12 @@ def read_listings(
     total, items = crud.list_listings(db, sector, q, limit, offset)
     return ListingPage(total=total, limit=limit, offset=offset, items=items)
 
-@router.get("/listing/{listing_id}", response_model=ListingOut)
+@router.get("/listings/{listing_id}", response_model=ListingOut)
 def read_listing(listing_id: int, db: Session = Depends(get_db)):
     listing = crud.get_listing(db, listing_id)
     if listing is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Listing not found")
+    return listing
 
 
 @router.post(

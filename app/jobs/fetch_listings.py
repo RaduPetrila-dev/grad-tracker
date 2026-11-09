@@ -74,7 +74,7 @@ def run(client: httpx.Client, api_key: str, pause: float = DETAIL_PAUSE_SECONDS)
                 if crud.upsert_listing(db, reed.to_listing(result, sector)):
                     new += 1
         log.info("salary periods filled for %d listings", fill_salary_types(db, client, api_key, pause))
-        fetch_run.status = "sucess"
+        fetch_run.status = "success"
     except Exception as exc:
         db.rollback()
         log.exception("fetch failed")
