@@ -15,6 +15,17 @@ services:
       interval: 5s
       retries: 10
 
+  app:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://tracker:tracker@db:5432/tracker
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   pgdata:
 
