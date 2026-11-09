@@ -9,7 +9,7 @@ jobs:
         runs-on: ubuntu-latest
         services:
             postgres:
-                image: postgres-17
+                image: postgres:17
                 env:
                     POSTGRES_USER: tracker
                     POSTGRES_PASSWORD: tracker
