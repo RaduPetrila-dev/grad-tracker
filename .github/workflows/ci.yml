@@ -6,10 +6,10 @@ on:
         branches: [main]
 jobs:
     test:
-        runs-on: ubuntu-lastest
+        runs-on: ubuntu-latest
         services:
             postgres:
-                image: postgres-17
+                image: postgres:17
                 env:
                     POSTGRES_USER: tracker
                     POSTGRES_PASSWORD: tracker
