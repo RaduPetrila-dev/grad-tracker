@@ -1,0 +1,44 @@
+# Unit tests for alerts.yml. Run with: promtool test rules alerts_test.yml
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  # The fetch job last succeeded at time 0 and never again: the alert fires after 26 hours.
+  - interval: 1m
+    input_series:
+      - series: 'grad_tracker_last_successful_fetch_timestamp_seconds{job="grad-tracker", instance="app:8000"}'
+        values: "0x1700"
+    alert_rule_test:
+      - eval_time: 25h
+        alertname: FetchJobStale
+        exp_alerts: []
+      - eval_time: 28h
+        alertname: FetchJobStale
+        exp_alerts:
+          - exp_labels:
+              severity: warning
+              job: grad-tracker
+              instance: app:8000
+            exp_annotations:
+              summary: "No successful fetch job in the last 26 hours"
+
+  # The app answers for 2 minutes, then stops: the alert fires 2 minutes later.
+  - interval: 1m
+    input_series:
+      - series: 'up{job="grad-tracker", instance="app:8000"}'
+        values: "1 1 0 0 0 0 0"
+    alert_rule_test:
+      - eval_time: 3m
+        alertname: AppDown
+        exp_alerts: []
+      - eval_time: 5m
+        alertname: AppDown
+        exp_alerts:
+          - exp_labels:
+              severity: critical
+              job: grad-tracker
+              instance: app:8000
+            exp_annotations:
+              summary: "Grad Tracker has failed every scrape for 2 minutes"

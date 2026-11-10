@@ -1,0 +1,29 @@
+groups:
+  - name: grad-tracker
+    rules:
+      - alert: AppDown
+        expr: up{job="grad-tracker"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Grad Tracker has failed every scrape for 2 minutes"
+
+      - alert: FetchJobStale
+        expr: time() - grad_tracker_last_successful_fetch_timestamp_seconds > 26 * 3600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "No successful fetch job in the last 26 hours"
+
+      - alert: HighErrorRate
+        expr: |
+          sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.05
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: "More than 5% of requests returned a 5xx error for 10 minutes"
+
+

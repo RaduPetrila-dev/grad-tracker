@@ -5,8 +5,10 @@ from sqlalchemy.orm import Session
 
 from app import api, pages
 from app.db import get_db
+from app.metrics import MetricsMiddleware, metrics_response
 
 app = FastAPI(title="UK Grad Tracker", version="1.0.0")
+app.add_middleware(MetricsMiddleware)
 app.include_router(api.router)
 app.include_router(pages.router)
 
@@ -19,4 +21,8 @@ def health(db: Session = Depends(get_db)):
     except SQLAlchemyError:
         raise HTTPException(status_code=503, detail="Database unavailable")
     return {"status": "ok"}
+
+@app.get("/metrics", include_in_schema=False)
+def metrics(db: Session = Depends(get_db)):
+    return metrics_response(db)
 
